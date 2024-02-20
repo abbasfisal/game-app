@@ -5,4 +5,5 @@ type Game struct {
 	Category    string
 	QuestionIDs []uint
 	PlayerIDs   []uint
+	WinnerID    uint
 }
