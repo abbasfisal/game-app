@@ -14,7 +14,7 @@ type MYSQLDB struct {
 }
 
 func New() *MYSQLDB {
-	db, err := sql.Open("mysql", "root:password@/gameapp_db")
+	db, err := sql.Open("mysql", "root:password@(localhost:3307)/gameapp_db")
 	if err != nil {
 		panic(fmt.Errorf("unable to open mysql : %v", err))
 	}
