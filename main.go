@@ -1,33 +1,52 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/repository/mysql"
+	"github.com/abbasfisal/game-app/service/userservice"
+	"io"
+	"log"
+	"net/http"
 )
 
 func main() {
+	http.HandleFunc("/health-check", healthCheckHandler)
+	http.HandleFunc("/users/register", registerHandler)
 
-	testUserRepo();
+	println("localhost:8080 is running")
+	log.Fatal(http.ListenAndServe("localhost:8080", nil))
 }
 
-func testUserRepo() {
-	repo := mysql.New()
-	created_user, err := repo.Register(entity.User{
-		ID:          0,
-		Name:        "abbas",
-		PhoneNumber: "09356743672",
-	})
-	if err != nil {
-		fmt.Println("register error :", err)
-	} else {
-		fmt.Println("user created successfully", created_user)
+func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, `{"message":"every thing is ok "}`)
+}
+
+func registerHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		fmt.Fprintf(w, `{"error":"invalid method "}`)
+		return
 	}
 
-	unique, err := repo.IsPhoneNumberUnique(created_user.PhoneNumber)
+	data, err := io.ReadAll(r.Body)
 	if err != nil {
-		fmt.Println("phone number is not unique", err)
-	} else {
-		fmt.Println("phone number is untie", unique)
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
 	}
+
+	var req userservice.RegisterRequest
+	err = json.Unmarshal(data, &req)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
+	}
+
+	mysqlRepo := mysql.New()
+	userSvc := userservice.New(mysqlRepo)
+	_, err = userSvc.Register(req)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
+	}
+	w.Write([]byte(`{"message":"user created"}`))
 }
