@@ -6,5 +6,5 @@ type Question struct {
 	PossibleAnswer []string
 	CorrectAnswer  string
 	Difficulty     string
-	Category       string
+	CategoryID     uint
 }

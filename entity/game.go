@@ -2,7 +2,7 @@ package entity
 
 type Game struct {
 	ID          uint
-	Category    string
+	CategoryID  uint
 	QuestionIDs []uint
 	PlayerIDs   []uint
 	WinnerID    uint
