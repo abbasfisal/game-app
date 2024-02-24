@@ -25,8 +25,8 @@ func New(repo Repository) Service {
 
 // RegisterRequest -- Request
 type RegisterRequest struct {
-	Name        string
-	PhoneNumber string
+	Name        string `json:"name"`
+	PhoneNumber string `json:"phone_number"`
 }
 
 // RegisterResponse -- Response

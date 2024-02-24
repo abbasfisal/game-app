@@ -23,8 +23,9 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
 	if r.Method != http.MethodPost {
-		fmt.Fprintf(w, `{"error":"invalid method "}`)
+		fmt.Fprintf(w, `{"er	ror":"invalid method "}`)
 		return
 	}
 
