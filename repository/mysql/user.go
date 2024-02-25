@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/abbasfisal/game-app/entity"
+	"log"
 )
 
 func (db *MYSQLDB) IsPhoneNumberUnique(phoneNumber string) (bool, error) {
@@ -48,4 +49,21 @@ func (db *MYSQLDB) GetUserByPhoneNumber(phoneNumber string) (entity.User, bool, 
 		return u, false, fmt.Errorf("can not scan query resutl: %w", err)
 	}
 	return u, true, nil
+}
+
+func (db *MYSQLDB) GetUserByID(userID uint) (entity.User, error) {
+	row := db.db.QueryRow(`select * from users where id = ?`, userID)
+
+	u := entity.User{}
+	var createdAt []uint8
+
+	err := row.Scan(&u.ID, &u.Name, &u.PhoneNumber, &u.Password, &createdAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return entity.User{}, fmt.Errorf("record not found")
+		}
+		return u, fmt.Errorf("can not scan query resutl: %w", err)
+	}
+	log.Println(userID, u)
+	return u, nil
 }
