@@ -22,7 +22,7 @@ func (db *MYSQLDB) IsPhoneNumberUnique(phoneNumber string) (bool, error) {
 	return false, nil
 }
 func (db *MYSQLDB) Register(u entity.User) (entity.User, error) {
-	res, err := db.db.Exec(`insert into users (name , phone_number) values (? , ?)`, u.Name, u.PhoneNumber)
+	res, err := db.db.Exec(`insert into users (name , phone_number , password) values (? , ? , ?)`, u.Name, u.PhoneNumber, u.Password)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("can not execut command %w", err)
 	}
