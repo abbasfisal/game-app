@@ -13,9 +13,40 @@ import (
 func main() {
 	http.HandleFunc("/health-check", healthCheckHandler)
 	http.HandleFunc("/users/register", registerHandler)
+	http.HandleFunc("/users/login", loginHandler)
 
 	println("localhost:8080 is running")
 	log.Fatal(http.ListenAndServe("localhost:8080", nil))
+}
+
+func loginHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("content-type", "application/json")
+	if r.Method != http.MethodPost {
+		fmt.Fprintf(w, `{"error":"invalid method "}`)
+		return
+	}
+
+	data, err := io.ReadAll(r.Body)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
+	}
+
+	var req userservice.LoginRequest
+	err = json.Unmarshal(data, &req)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
+	}
+
+	mysqlRepo := mysql.New()
+	userSvc := userservice.New(mysqlRepo)
+	_, err = userSvc.Login(req)
+	if err != nil {
+		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
+		return
+	}
+	w.Write([]byte(`{"message":"user credentials is ok ;)"}`))
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
