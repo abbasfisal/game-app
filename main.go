@@ -4,15 +4,20 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/abbasfisal/game-app/repository/mysql"
+	"github.com/abbasfisal/game-app/service/authservice"
 	"github.com/abbasfisal/game-app/service/userservice"
-	"github.com/golang-jwt/jwt/v5"
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
-	JwtSignKey = "jwt_secret"
+	JwtSignKey                 = "jwt_secret"
+	AccessTokenSubject         = "at"
+	RefreshTokenSubject        = "rt"
+	AccessTokenExpireDuration  = time.Hour * 24
+	RefreshTokenExpireDuration = time.Hour * 24 * 7
 )
 
 func main() {
@@ -33,13 +38,16 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth := r.Header.Get("Authorization")
-	claims, err := parseJWT(auth)
+	authSrv := authservice.New(JwtSignKey, AccessTokenSubject, RefreshTokenSubject, AccessTokenExpireDuration, RefreshTokenExpireDuration)
+
+	authToken := r.Header.Get("Authorization")
+
+	claims, err := authSrv.ParseToken(authToken)
 	if err != nil {
 		fmt.Errorf(`{"error":"token isnot valid "}`)
 	}
 	mysqlRepo := mysql.New()
-	userSvc := userservice.New(mysqlRepo, JwtSignKey)
+	userSvc := userservice.New(authSrv, mysqlRepo)
 	resp, err := userSvc.GetProfile(userservice.ProfileRequest{UserID: claims.UserID})
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
@@ -53,7 +61,6 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Write(data)
-
 }
 
 func loginHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,9 +82,10 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 		return
 	}
+	authSrv := authservice.New(JwtSignKey, AccessTokenSubject, RefreshTokenSubject, AccessTokenExpireDuration, RefreshTokenExpireDuration)
 
 	mysqlRepo := mysql.New()
-	userSvc := userservice.New(mysqlRepo, JwtSignKey)
+	userSvc := userservice.New(authSrv, mysqlRepo)
 	res, err := userSvc.Login(req)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
@@ -116,30 +124,14 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 		return
 	}
+	authSrv := authservice.New(JwtSignKey, AccessTokenSubject, RefreshTokenSubject, AccessTokenExpireDuration, RefreshTokenExpireDuration)
 
 	mysqlRepo := mysql.New()
-	userSvc := userservice.New(mysqlRepo, JwtSignKey)
+	userSvc := userservice.New(authSrv, mysqlRepo)
 	_, err = userSvc.Register(req)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 		return
 	}
 	w.Write([]byte(`{"message":"user created"}`))
-}
-
-func parseJWT(tokenString string) (*userservice.Claims, error) {
-
-	token, err := jwt.ParseWithClaims(tokenString[len("Bearer "):], &userservice.Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(JwtSignKey), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if claims, ok := token.Claims.(*userservice.Claims); ok && token.Valid {
-		fmt.Printf("userID : %v , exp:  %v", claims.UserID, claims.ExpiresAt)
-		return claims, nil
-	} else {
-		return nil, err
-	}
-
 }

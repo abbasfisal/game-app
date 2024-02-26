@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/pkg/phonenumber"
-	"github.com/golang-jwt/jwt/v5"
-	"time"
 )
 
 // Repository
@@ -18,16 +16,25 @@ type Repository interface {
 	GetUserByID(userID uint) (entity.User, error)
 }
 
-// Service
-type Service struct {
-	signKey string
-	repo    Repository
+//type AuthParser interface {
+//	ParseToken(bearerToken string) (*Claims, error)
+//}
+
+type AuthGenerator interface {
+	CreateAccessToken(u entity.User) (string, error)
+	CreateRefreshToken(u entity.User) (string, error)
 }
 
-func New(repo Repository, signKey string) Service {
+// Service
+type Service struct {
+	auth AuthGenerator
+	repo Repository
+}
+
+func New(authGenerator AuthGenerator, repo Repository) Service {
 	return Service{
-		signKey: signKey,
-		repo:    repo,
+		auth: authGenerator,
+		repo: repo,
 	}
 }
 
@@ -92,7 +99,8 @@ type LoginRequest struct {
 	Password    string `json:"password"`
 }
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
@@ -110,12 +118,13 @@ func (s Service) Login(req LoginRequest) (LoginResponse, error) {
 		return LoginResponse{}, fmt.Errorf("username or password isnt correct! ")
 	}
 
-	token, err := createToken(user.ID, s.signKey)
+	accessToken, err := s.auth.CreateAccessToken(user)
 	if err != nil {
 		return LoginResponse{}, fmt.Errorf("unexpected error while generating jwt : %w", err)
-
 	}
-	return LoginResponse{token}, nil
+
+	refreshToken, err := s.auth.CreateRefreshToken(user)
+	return LoginResponse{accessToken, refreshToken}, nil
 }
 
 type ProfileRequest struct {
@@ -133,30 +142,3 @@ func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
 	}
 	return ProfileResponse{Name: user.Name}, nil
 }
-
-func createToken(userID uint, signKey string) (string, error) {
-
-	// set our claims
-	claims := &Claims{
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour * 24 * 7)),
-		},
-		UserID: userID,
-	}
-	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := accessToken.SignedString([]byte(signKey))
-	if err != nil {
-		return "", err
-	}
-	// Creat token string
-	return tokenString, nil
-}
-
-type Claims struct {
-	jwt.RegisteredClaims
-	UserID uint `json:"user_id"`
-}
-
-//func (c Claims) Valid() error {
-//	return c.RegisteredClaims.Valid()
-//}
