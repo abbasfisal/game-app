@@ -135,8 +135,6 @@ func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
 }
 
 func createToken(userID uint, signKey string) (string, error) {
-	// create a signer for rsa 256
-	//t := jwt.New(jwt.GetSigningMethod("RS256"))
 
 	// set our claims
 	claims := &Claims{
@@ -156,9 +154,9 @@ func createToken(userID uint, signKey string) (string, error) {
 
 type Claims struct {
 	jwt.RegisteredClaims
-	UserID uint
+	UserID uint `json:"user_id"`
 }
 
-func (c Claims) Valid() error {
-	return nil
-}
+//func (c Claims) Valid() error {
+//	return c.RegisteredClaims.Valid()
+//}

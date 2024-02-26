@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/abbasfisal/game-app/repository/mysql"
 	"github.com/abbasfisal/game-app/service/userservice"
+	"github.com/golang-jwt/jwt/v5"
 	"io"
 	"log"
 	"net/http"
@@ -32,24 +33,20 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, err := io.ReadAll(r.Body)
+	auth := r.Header.Get("Authorization")
+	claims, err := parseJWT(auth)
 	if err != nil {
-		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
-		return
+		fmt.Errorf(`{"error":"token isnot valid "}`)
 	}
-
-	pReq := userservice.ProfileRequest{}
-	err = json.Unmarshal(data, &pReq)
-
 	mysqlRepo := mysql.New()
 	userSvc := userservice.New(mysqlRepo, JwtSignKey)
-	resp, err := userSvc.GetProfile(pReq)
+	resp, err := userSvc.GetProfile(userservice.ProfileRequest{UserID: claims.UserID})
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 		return
 	}
 
-	data, err = json.Marshal(resp)
+	data, err := json.Marshal(resp)
 	if err != nil {
 		w.Write([]byte(fmt.Sprintf(`{"error":"%s"}`, err)))
 		return
@@ -128,4 +125,21 @@ func registerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte(`{"message":"user created"}`))
+}
+
+func parseJWT(tokenString string) (*userservice.Claims, error) {
+
+	token, err := jwt.ParseWithClaims(tokenString[len("Bearer "):], &userservice.Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(JwtSignKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*userservice.Claims); ok && token.Valid {
+		fmt.Printf("userID : %v , exp:  %v", claims.UserID, claims.ExpiresAt)
+		return claims, nil
+	} else {
+		return nil, err
+	}
+
 }
