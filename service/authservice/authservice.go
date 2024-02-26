@@ -32,7 +32,7 @@ func (s Service) CreateAccessToken(u entity.User) (string, error) {
 func (s Service) CreateRefreshToken(u entity.User) (string, error) {
 	return s.createToken(u.ID, s.refreshSubject, s.refreshExpirationTime)
 }
-func (s Service) ParseToken(bearerToken string) (*Claims, error) {
+func (s Service) VerifyToken(bearerToken string) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(bearerToken[len("Bearer "):], &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(s.signKey), nil

@@ -42,7 +42,7 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 
 	authToken := r.Header.Get("Authorization")
 
-	claims, err := authSrv.ParseToken(authToken)
+	claims, err := authSrv.VerifyToken(authToken)
 	if err != nil {
 		fmt.Errorf(`{"error":"token isnot valid "}`)
 	}
