@@ -32,10 +32,15 @@ func (s Server) Serve() {
 
 	//routes
 	e.GET("/health-check", s.healthcheck)
-	//http.HandleFunc("/users/register", registerHandler)
-	//	http.HandleFunc("/users/login", loginHandler)
+
+	userGroup := e.Group("/users")
+
+	userGroup.POST("/register", s.registerHandler)
+	userGroup.POST("/login", s.loginHandler)
+	userGroup.POST("/profileHandler", s.loginHandler)
+
 	//	http.HandleFunc("/users/profile", profileHandler)
-	e.POST("users/register", s.registerHandler)
+
 	//run server
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HttpServer.Port)))
 }

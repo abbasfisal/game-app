@@ -14,10 +14,6 @@ func (s Server) registerHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	//authSrv := authservice.New(JwtSignKey, AccessTokenSubject, RefreshTokenSubject, AccessTokenExpireDuration, RefreshTokenExpireDuration)
-	//mysqlRepo := mysql.New()
-	//userSvc := userservice.New(authSrv, mysqlRepo)
-
 	response, err := s.userSvc.Register(req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
