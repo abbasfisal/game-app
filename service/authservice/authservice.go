@@ -24,6 +24,7 @@ func New(signKey string, accessSubject, refreshSubject string, accessExpirationT
 		refreshSubject:        refreshSubject,
 	}
 }
+
 func (s Service) CreateAccessToken(u entity.User) (string, error) {
 	return s.createToken(u.ID, s.accessSubject, s.accessExpirationTime)
 }
