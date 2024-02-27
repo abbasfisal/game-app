@@ -26,26 +26,10 @@ func New(signKey string, accessSubject, refreshSubject string, accessExpirationT
 }
 func (s Service) CreateAccessToken(u entity.User) (string, error) {
 	return s.createToken(u.ID, s.accessSubject, s.accessExpirationTime)
-
 }
 
 func (s Service) CreateRefreshToken(u entity.User) (string, error) {
 	return s.createToken(u.ID, s.refreshSubject, s.refreshExpirationTime)
-}
-func (s Service) VerifyToken(bearerToken string) (*Claims, error) {
-
-	token, err := jwt.ParseWithClaims(bearerToken[len("Bearer "):], &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(s.signKey), nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		fmt.Printf("userID : %v , exp:  %v", claims.UserID, claims.ExpiresAt)
-		return claims, nil
-	} else {
-		return nil, err
-	}
 }
 
 func (s Service) createToken(userID uint, subject string, expiresDuration time.Duration) (string, error) {
@@ -65,4 +49,20 @@ func (s Service) createToken(userID uint, subject string, expiresDuration time.D
 	}
 	// Creat token string
 	return tokenString, nil
+}
+
+func (s Service) VerifyToken(bearerToken string) (*Claims, error) {
+
+	token, err := jwt.ParseWithClaims(bearerToken[len("Bearer "):], &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(s.signKey), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		fmt.Printf("userID : %v , exp:  %v", claims.UserID, claims.ExpiresAt)
+		return claims, nil
+	} else {
+		return nil, err
+	}
 }
