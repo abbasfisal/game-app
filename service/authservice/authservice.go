@@ -7,30 +7,29 @@ import (
 	"time"
 )
 
+type Config struct {
+	SignKey               string
+	AccessExpirationTime  time.Duration
+	RefreshExpirationTime time.Duration
+	AccessSubject         string
+	RefreshSubject        string
+}
 type Service struct {
-	signKey               string
-	accessExpirationTime  time.Duration
-	refreshExpirationTime time.Duration
-	accessSubject         string
-	refreshSubject        string
+	config Config
 }
 
-func New(signKey string, accessSubject, refreshSubject string, accessExpirationTime, refreshExpirationTime time.Duration) Service {
+func New(cfg Config) Service {
 	return Service{
-		signKey:               signKey,
-		accessExpirationTime:  accessExpirationTime,
-		refreshExpirationTime: refreshExpirationTime,
-		accessSubject:         accessSubject,
-		refreshSubject:        refreshSubject,
+		config: cfg,
 	}
 }
 
 func (s Service) CreateAccessToken(u entity.User) (string, error) {
-	return s.createToken(u.ID, s.accessSubject, s.accessExpirationTime)
+	return s.createToken(u.ID, s.config.AccessSubject, s.config.AccessExpirationTime)
 }
 
 func (s Service) CreateRefreshToken(u entity.User) (string, error) {
-	return s.createToken(u.ID, s.refreshSubject, s.refreshExpirationTime)
+	return s.createToken(u.ID, s.config.RefreshSubject, s.config.RefreshExpirationTime)
 }
 
 func (s Service) createToken(userID uint, subject string, expiresDuration time.Duration) (string, error) {
@@ -44,7 +43,7 @@ func (s Service) createToken(userID uint, subject string, expiresDuration time.D
 		UserID: userID,
 	}
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := accessToken.SignedString([]byte(s.signKey))
+	tokenString, err := accessToken.SignedString([]byte(s.config.SignKey))
 	if err != nil {
 		return "", err
 	}
@@ -55,7 +54,7 @@ func (s Service) createToken(userID uint, subject string, expiresDuration time.D
 func (s Service) VerifyToken(bearerToken string) (*Claims, error) {
 
 	token, err := jwt.ParseWithClaims(bearerToken[len("Bearer "):], &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(s.signKey), nil
+		return []byte(s.config.SignKey), nil
 	})
 	if err != nil {
 		return nil, err

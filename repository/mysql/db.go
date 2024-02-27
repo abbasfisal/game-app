@@ -7,14 +7,23 @@ import (
 	"time"
 )
 
+type Config struct {
+	Username string
+	Password string
+	Port     int
+	Host     string
+	DbName   string
+}
+
 // ...
 
 type MYSQLDB struct {
-	db *sql.DB
+	config Config
+	db     *sql.DB
 }
 
-func New() *MYSQLDB {
-	db, err := sql.Open("mysql", "root:password@(localhost:3307)/gameapp_db")
+func New(cfg Config) *MYSQLDB {
+	db, err := sql.Open("mysql", fmt.Sprintf("%s:%s@(%s:%d)/%s", cfg.Username, cfg.Password, cfg.Host, cfg.Port, cfg.DbName))
 	if err != nil {
 		panic(fmt.Errorf("unable to open mysql : %v", err))
 	}
@@ -23,5 +32,5 @@ func New() *MYSQLDB {
 	db.SetMaxOpenConns(10)
 	db.SetMaxIdleConns(10)
 
-	return &MYSQLDB{db: db}
+	return &MYSQLDB{config: cfg, db: db}
 }
