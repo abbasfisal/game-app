@@ -13,7 +13,7 @@ func (db *MYSQLDB) IsPhoneNumberUnique(phoneNumber string) (bool, error) {
 	u := entity.User{}
 	var createdAt []uint8
 
-	err := row.Scan(&u.ID, &u.Name, &u.PhoneNumber, &u.Password, &createdAt)
+	err := row.Scan(&u.ID, &u.Name, &u.PhoneNumber, &createdAt, &u.Password)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return true, nil

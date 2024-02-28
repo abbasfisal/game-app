@@ -1,0 +1,11 @@
+production:
+  dialect: mysql
+  datasource: root:password@(localhost:3307)/gameapp_db?parseTime=true
+  dir: repository/mysql/migrations
+  table: migrations
+
+# go install github.com/rubenv/sql-migrate/...@latest
+# sql-migrate up -env=production -config=dbconfig.yml
+# sql-migrate down -env=production -config=dbconfig.yml -limit=1
+# sql-migrate status -env=production -config=dbconfig.yml
+
