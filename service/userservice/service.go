@@ -80,57 +80,14 @@ func GetMD5Hash(text string) string {
 	return hex.EncodeToString(hash[:])
 }
 
-func (s Service) Login(req dto.LoginRequest) (dto.LoginResponse, error) {
-	const op = "userservice.Login"
-	user, exist, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
-
-	if err != nil {
-		return dto.LoginResponse{}, richerror.New(op).WithError(err)
-
-	}
-
-	if !exist {
-		return dto.LoginResponse{}, fmt.Errorf("username or password isnt correct! ")
-	}
-	if user.Password != GetMD5Hash(req.Password) {
-		return dto.LoginResponse{}, fmt.Errorf("username or password isnt correct! ")
-	}
-
-	accessToken, err := s.auth.CreateAccessToken(user)
-	if err != nil {
-		return dto.LoginResponse{}, fmt.Errorf("unexpected error while generating jwt : %w", err)
-	}
-
-	refreshToken, err := s.auth.CreateRefreshToken(user)
-
-	return dto.LoginResponse{
-		User: dto.UserInfo{
-			ID:          user.ID,
-			PhoneNumber: user.PhoneNumber,
-			Name:        user.Name,
-		},
-		Tokens: dto.Tokens{
-			AccessToken:  accessToken,
-			RefreshToken: refreshToken,
-		},
-	}, nil
-}
-
-type ProfileRequest struct {
-	UserID uint
-}
-type ProfileResponse struct {
-	Name string `json:"name"`
-}
-
-func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
+func (s Service) GetProfile(req dto.ProfileRequest) (dto.ProfileResponse, error) {
 	const op = "userservice.GetProfile"
 
 	print("id", req.UserID)
 	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
-		return ProfileResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).WithError(err).WithMeta(map[string]interface{}{"req": req})
+		return dto.ProfileResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).WithError(err).WithMeta(map[string]interface{}{"req": req})
 	}
 
-	return ProfileResponse{Name: user.Name}, nil
+	return dto.ProfileResponse{Name: user.Name}, nil
 }
