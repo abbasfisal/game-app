@@ -9,3 +9,8 @@ sql-migrate down -env=production -config=repository/mysql/dbconfig.yml -limit=1
 sql-migrate status -env=production -config=repository/mysql/dbconfig.yml
 
 ```
+
+get date in digit format
+```bash
+date +%s
+```
