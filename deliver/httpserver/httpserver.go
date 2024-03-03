@@ -36,8 +36,8 @@ func (s Server) Serve() {
 	userGroup := e.Group("/users")
 
 	userGroup.POST("/register", s.registerHandler)
-	userGroup.POST("/login", s.loginHandler)
-	userGroup.POST("/profileHandler", s.loginHandler)
+	//userGroup.POST("/login", s.loginHandler)
+	//userGroup.POST("/profileHandler", s.loginHandler)
 
 	//	http.HandleFunc("/users/profile", profileHandler)
 

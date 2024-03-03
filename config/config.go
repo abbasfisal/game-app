@@ -6,9 +6,9 @@ import (
 )
 
 type Config struct {
-	HttpServer HttpServer
-	Mysql      mysql.Config
-	Auth       authservice.Config
+	HttpServer HttpServer         //port
+	Mysql      mysql.Config       //username,pass,dbname,port,host
+	Auth       authservice.Config //accesstoken,signkey,refreshtoken ,etc
 }
 
 type HttpServer struct {

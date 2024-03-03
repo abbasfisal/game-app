@@ -43,6 +43,13 @@ func main() {
 	//
 
 }
+func setupServices(cfg config.Config) (authservice.Service, userservice.Service) {
+	authSvc := authservice.New(cfg.Auth)
+	mysqlRepo := mysql.New(cfg.Mysql)
+	userSvc := userservice.New(authSvc, mysqlRepo)
+
+	return authSvc, userSvc
+}
 
 //func profileHandler(w http.ResponseWriter, r *http.Request) {
 //	w.Header().Set("content-type", "application/json")
@@ -114,11 +121,3 @@ func main() {
 //
 //	w.Write(data)
 //}
-
-func setupServices(cfg config.Config) (authservice.Service, userservice.Service) {
-	authSvc := authservice.New(cfg.Auth)
-	mysqlRepo := mysql.New(cfg.Mysql)
-	userSvc := userservice.New(authSvc, mysqlRepo)
-
-	return authSvc, userSvc
-}

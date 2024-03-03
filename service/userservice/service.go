@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/pkg/phonenumber"
+	"github.com/abbasfisal/game-app/pkg/richerror"
 )
 
 // Repository
@@ -113,11 +114,12 @@ type LoginResponse struct {
 }
 
 func (s Service) Login(req LoginRequest) (LoginResponse, error) {
-
+	const op = "userservice.Login"
 	user, exist, err := s.repo.GetUserByPhoneNumber(req.PhoneNumber)
 
 	if err != nil {
-		return LoginResponse{}, fmt.Errorf("unexpected error: %v", err)
+		return LoginResponse{}, richerror.New(op).WithError(err)
+
 	}
 
 	if !exist {
@@ -155,10 +157,13 @@ type ProfileResponse struct {
 }
 
 func (s Service) GetProfile(req ProfileRequest) (ProfileResponse, error) {
+	const op = "userservice.GetProfile"
+
 	print("id", req.UserID)
 	user, err := s.repo.GetUserByID(req.UserID)
 	if err != nil {
-		return ProfileResponse{}, fmt.Errorf("unexpected error: %w", err)
+		return ProfileResponse{}, richerror.New(op).WithKind(richerror.KindNotFound).WithError(err).WithMeta(map[string]interface{}{"req": req})
 	}
+
 	return ProfileResponse{Name: user.Name}, nil
 }
