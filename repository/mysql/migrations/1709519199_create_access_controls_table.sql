@@ -2,7 +2,7 @@
 CREATE TABLE `access_controls`
 (
     `id`         INT PRIMARY KEY AUTO_INCREMENT,
-    `actor_id`   VARCHAR(191) NOT NULL,
+    `actor_id`   int NOT NULL,
     `actor_type` ENUM('role' , 'user') NOT NULL,
     `permission_id` INT NOT NULL ,
     `created_at` datetime DEFAULT CURRENT_TIMESTAMP,

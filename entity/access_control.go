@@ -14,3 +14,7 @@ const (
 	RoleActorType = "role"
 	UserActorType = "user"
 )
+
+type Repository interface {
+	GetUserPermissionsTitle(userID uint) ([]PermissionTitle, error)
+}
