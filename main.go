@@ -1,11 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"github.com/abbasfisal/game-app/config"
 	"github.com/abbasfisal/game-app/deliver/httpserver"
 	"github.com/abbasfisal/game-app/repository/mysql"
+	"github.com/abbasfisal/game-app/scheduler"
 	"github.com/abbasfisal/game-app/service/authservice"
 	"github.com/abbasfisal/game-app/service/userservice"
+	"os"
+	"os/signal"
 	"time"
 )
 
@@ -43,9 +47,27 @@ func main() {
 	//
 	authSvc, UserSvc := setupServices(cfg)
 	server := httpserver.New(cfg, authSvc, UserSvc)
-	server.Serve()
-	//
 
+	//
+	done := make(chan bool)
+
+	sch := scheduler.New()
+	go func() {
+		sch.Start(done)
+	}()
+
+	go func() {
+		server.Serve()
+	}()
+
+	gracefullyShutdown := make(chan os.Signal)
+	signal.Notify(gracefullyShutdown, os.Interrupt)
+	<-gracefullyShutdown
+	fmt.Println("gracefully shutdown ... ")
+
+	done <- true
+
+	time.Sleep(5 * time.Second)
 }
 func setupServices(cfg config.Config) (authservice.Service, userservice.Service) {
 	authSvc := authservice.New(cfg.Auth)
