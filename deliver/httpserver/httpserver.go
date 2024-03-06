@@ -23,7 +23,7 @@ func New(config config.Config, authSvc authservice.Service, userSvc userservice.
 	}
 }
 
-func (s Server) Serve() {
+func (s Server) Serve() *echo.Echo {
 	e := echo.New()
 
 	//middleware
@@ -42,5 +42,7 @@ func (s Server) Serve() {
 	//	http.HandleFunc("/users/profile", profileHandler)
 
 	//run server
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HttpServer.Port)))
+	go e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HttpServer.Port)))
+
+	return e
 }

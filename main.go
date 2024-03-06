@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"github.com/abbasfisal/game-app/config"
 	"github.com/abbasfisal/game-app/deliver/httpserver"
@@ -8,6 +9,7 @@ import (
 	"github.com/abbasfisal/game-app/scheduler"
 	"github.com/abbasfisal/game-app/service/authservice"
 	"github.com/abbasfisal/game-app/service/userservice"
+	"github.com/labstack/echo/v4"
 	"os"
 	"os/signal"
 	"time"
@@ -56,13 +58,21 @@ func main() {
 		sch.Start(done)
 	}()
 
+	var httpServer *echo.Echo
 	go func() {
-		server.Serve()
+		httpServer = server.Serve()
 	}()
 
 	gracefullyShutdown := make(chan os.Signal)
 	signal.Notify(gracefullyShutdown, os.Interrupt)
 	<-gracefullyShutdown
+
+	err := httpServer.Shutdown(context.Background())
+	if err != nil {
+		fmt.Println("http server shutdown error: ", err)
+		return
+	}
+
 	fmt.Println("gracefully shutdown ... ")
 
 	done <- true
