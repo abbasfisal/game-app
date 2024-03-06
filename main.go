@@ -36,6 +36,10 @@ func main() {
 			RefreshSubject:        RefreshTokenSubject,
 		},
 	}
+	//redis
+	//adp := redis.New(cfg)
+	//redismatching.New(adp)
+	//matchingservice.New()
 	//
 	authSvc, UserSvc := setupServices(cfg)
 	server := httpserver.New(cfg, authSvc, UserSvc)
