@@ -1,15 +1,15 @@
 package httpserver
 
 import (
+	"github.com/abbasfisal/game-app/deliver/dto"
 	"github.com/abbasfisal/game-app/pkg/richerror"
-	"github.com/abbasfisal/game-app/service/userservice"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
 
 func (s Server) registerHandler(c echo.Context) error {
 
-	var req userservice.RegisterRequest
+	var req dto.RegisterRequest
 	err := c.Bind(&req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
