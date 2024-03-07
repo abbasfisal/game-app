@@ -33,3 +33,6 @@ func (s Service) AddToWaitingList(req dto.AddToWaitingListRequest) (dto.AddToWai
 	return dto.AddToWaitingListResponse{Timeout: s.config.WaitingTimeout}, nil
 
 }
+func (s Service) MatchWaitedUsers(req dto.MatchWaitedRequest) (dto.MatchWaitedResponse, error) {
+	return dto.MatchWaitedResponse{}, nil
+}
