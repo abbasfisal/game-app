@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/abbasfisal/game-app/scheduler"
+	"github.com/abbasfisal/game-app/service/matchingservice"
+	"sync"
 	"time"
 )
 
@@ -17,14 +19,19 @@ const (
 
 func main() {
 
+	matchSvc := matchingservice.New()
+	var wg sync.WaitGroup
+	wg.Add(1)
+
 	done := make(chan bool)
-	sch := scheduler.New()
+	sch := scheduler.New(matchSvc)
 	go func() {
-		sch.Start(done)
+		sch.Start(done, &wg)
 	}()
 	done <- true
 
+	wg.Wait()
 	fmt.Println("received interrupt , shutting down gracefully")
-	
+
 	time.Sleep(GracefulShutDownTimeOut)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/abbasfisal/game-app/deliver/dto"
 	"github.com/abbasfisal/game-app/service/matchingservice"
 	"github.com/go-co-op/gocron/v2"
+	"sync"
 	"time"
 )
 
@@ -25,7 +26,9 @@ func New(matchingSvc matchingservice.Service) Scheduler {
 	}
 }
 
-func (s Scheduler) Start(done <-chan bool) {
+func (s Scheduler) Start(done <-chan bool, wg *sync.WaitGroup) {
+
+	defer wg.Done()
 
 	s.sch.NewJob(
 		gocron.DurationJob(
