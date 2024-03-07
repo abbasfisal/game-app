@@ -6,9 +6,9 @@ import (
 	"github.com/abbasfisal/game-app/config"
 	"github.com/abbasfisal/game-app/deliver/httpserver"
 	"github.com/abbasfisal/game-app/repository/mysql"
-	"github.com/abbasfisal/game-app/scheduler"
 	"github.com/abbasfisal/game-app/service/authservice"
 	"github.com/abbasfisal/game-app/service/userservice"
+	"github.com/labstack/echo/v4"
 	"os"
 	"os/signal"
 	"time"
@@ -51,36 +51,27 @@ func main() {
 	authSvc, UserSvc := setupServices(cfg)
 	server := httpserver.New(cfg, authSvc, UserSvc)
 
-	//
-	done := make(chan bool)
-
-	sch := scheduler.New()
+	var httpServer *echo.Echo
 	go func() {
-		sch.Start(done)
-	}()
-
-	go func() {
-		server.Serve()
+		httpServer = server.Serve()
 	}()
 
 	//graceful shut down
-	ctx := context.Background()
-	ctxWithTimeOut, cancel := context.WithTimeout(ctx, cfg.Application.GracefulTimeOutShutDown)
+
+	ctxWithTimeOut, cancel := context.WithTimeout(context.Background(), cfg.Application.GracefulTimeOutShutDown)
 	defer cancel()
 
 	gracefullyShutdown := make(chan os.Signal)
 	signal.Notify(gracefullyShutdown, os.Interrupt)
 	<-gracefullyShutdown
 
-	err := server.Router.Shutdown(ctxWithTimeOut)
+	err := httpServer.Shutdown(ctxWithTimeOut)
 	if err != nil {
 		fmt.Println("http server shutdown error: ", err)
 		return
 	}
 
 	fmt.Println("gracefully shutdown ... ")
-
-	done <- true
 
 	<-ctxWithTimeOut.Done()
 	//time.Sleep(cfg.Application.GracefulTimeOutShutDown)

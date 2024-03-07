@@ -15,7 +15,14 @@ func (s Server) registerHandler(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	response, err := s.userSvc.Register(req)
+	//context
+	ctx := c.Request().Context()
+	//ctxWithValue := context.WithValue(ctx, "key1", "val1")
+	//ctxWithTimeOut, cancelFunc := context.WithTimeout(ctx, 5*time.Second)
+	//defer cancelFunc()
+	//
+
+	response, err := s.userSvc.Register(ctx, req)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}

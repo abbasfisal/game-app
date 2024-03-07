@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"github.com/abbasfisal/game-app/entity"
@@ -24,8 +25,8 @@ func (db *MYSQLDB) IsPhoneNumberUnique(phoneNumber string) (bool, error) {
 	}
 	return false, nil
 }
-func (db *MYSQLDB) Register(u entity.User) (entity.User, error) {
-	res, err := db.db.Exec(`insert into users (name , phone_number , password) values (? , ? , ?)`, u.Name, u.PhoneNumber, u.Password)
+func (db *MYSQLDB) Register(ctx context.Context, u entity.User) (entity.User, error) {
+	res, err := db.db.ExecContext(ctx, `insert into users (name , phone_number , password) values (? , ? , ?)`, u.Name, u.PhoneNumber, u.Password)
 	if err != nil {
 		return entity.User{}, fmt.Errorf("can not execut command %w", err)
 	}

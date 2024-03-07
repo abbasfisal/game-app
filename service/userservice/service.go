@@ -1,6 +1,7 @@
 package userservice
 
 import (
+	"context"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
@@ -8,12 +9,13 @@ import (
 	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/pkg/phonenumber"
 	"github.com/abbasfisal/game-app/pkg/richerror"
+	"time"
 )
 
 // Repository
 type Repository interface {
 	IsPhoneNumberUnique(phoneNumber string) (bool, error)
-	Register(u entity.User) (entity.User, error)
+	Register(ctx context.Context, u entity.User) (entity.User, error)
 	GetUserByPhoneNumber(phoneNumber string) (entity.User, bool, error)
 	GetUserByID(userID uint) (entity.User, error)
 }
@@ -40,7 +42,18 @@ func New(authGenerator AuthGenerator, repo Repository) Service {
 	}
 }
 
-func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error) {
+func (s Service) Register(ctx context.Context, req dto.RegisterRequest) (dto.RegisterResponse, error) {
+
+	for {
+		select {
+		case <-ctx.Done():
+			fmt.Println("context done")
+			return dto.RegisterResponse{}, nil
+		default:
+			time.Sleep(1 * time.Second)
+		}
+	}
+
 	//validate phone
 	if !phonenumber.IsValid(req.PhoneNumber) {
 		return dto.RegisterResponse{}, fmt.Errorf("phone number is not valid")
@@ -66,7 +79,8 @@ func (s Service) Register(req dto.RegisterRequest) (dto.RegisterResponse, error)
 		PhoneNumber: req.PhoneNumber,
 		Password:    GetMD5Hash(req.Password),
 	}
-	createdUser, err := s.repo.Register(u)
+
+	createdUser, err := s.repo.Register(ctx, u)
 	if err != nil {
 		return dto.RegisterResponse{}, fmt.Errorf("unexpected eror %w", err)
 	}

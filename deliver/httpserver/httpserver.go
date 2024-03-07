@@ -13,6 +13,7 @@ type Server struct {
 	config  config.Config
 	authSvc authservice.Service
 	userSvc userservice.Service
+	Router  *echo.Echo
 }
 
 func New(config config.Config, authSvc authservice.Service, userSvc userservice.Service) Server {
@@ -20,29 +21,27 @@ func New(config config.Config, authSvc authservice.Service, userSvc userservice.
 		config:  config,
 		authSvc: authSvc,
 		userSvc: userSvc,
+		Router:  echo.New(),
 	}
 }
 
-func (s Server) Serve() *echo.Echo {
-	e := echo.New()
+func (s Server) Serve() {
 
 	//middleware
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
+	s.Router.Use(middleware.Logger())
+	s.Router.Use(middleware.Recover())
 
 	//routes
-	e.GET("/health-check", s.healthcheck)
+	s.Router.GET("/health-check", s.healthcheck)
 
-	userGroup := e.Group("/users")
+	userGroup := s.Router.Group("/users")
 
 	userGroup.POST("/register", s.registerHandler)
 	//userGroup.POST("/login", s.loginHandler)
 	//userGroup.POST("/profileHandler", s.loginHandler)
-
 	//	http.HandleFunc("/users/profile", profileHandler)
 
 	//run server
-	go e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", s.config.HttpServer.Port)))
+	s.Router.Logger.Fatal(s.Router.Start(fmt.Sprintf(":%d", s.config.HttpServer.Port)))
 
-	return e
 }
