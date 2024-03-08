@@ -4,6 +4,7 @@ import (
 	"github.com/abbasfisal/game-app/repository/mysql"
 	"github.com/abbasfisal/game-app/service/authservice"
 	"github.com/abbasfisal/game-app/service/matchingservice"
+	"github.com/abbasfisal/game-app/service/presenceservice"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type Config struct {
 	Mysql           mysql.Config       //username,pass,dbname,port,host
 	Auth            authservice.Config //accesstoken,signkey,refreshtoken ,etc
 	MatchingService matchingservice.Config
+	PresenceService presenceservice.Config
 }
 
 type HttpServer struct {

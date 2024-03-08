@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/abbasfisal/game-app/config"
 	"github.com/abbasfisal/game-app/deliver/httpserver"
+	"github.com/abbasfisal/game-app/pkg/timestamp"
 	"github.com/abbasfisal/game-app/repository/mysql"
-	"github.com/abbasfisal/game-app/scheduler"
 	"github.com/abbasfisal/game-app/service/authservice"
+	"github.com/abbasfisal/game-app/service/matchingservice"
+	"github.com/abbasfisal/game-app/service/presenceservice"
 	"github.com/abbasfisal/game-app/service/userservice"
 	"os"
 	"os/signal"
@@ -21,12 +23,15 @@ const (
 	AccessTokenExpireDuration  = time.Hour * 24
 	RefreshTokenExpireDuration = time.Hour * 24 * 7
 	GracefulShutDownTimeOut    = 5 * time.Second
+	PresenceExp                = "60m"
+	PresencePrefix             = "presence"
 )
 
 func main() {
 
 	cfg := config.Config{
-		HttpServer: config.HttpServer{Port: 8080},
+		Application: config.Application{GracefulTimeOutShutDown: GracefulShutDownTimeOut},
+		HttpServer:  config.HttpServer{Port: 8080},
 		Mysql: mysql.Config{
 			Username: "root",
 			Password: "password",
@@ -41,7 +46,11 @@ func main() {
 			AccessSubject:         AccessTokenSubject,
 			RefreshSubject:        RefreshTokenSubject,
 		},
-		Application: config.Application{GracefulTimeOutShutDown: GracefulShutDownTimeOut},
+		MatchingService: matchingservice.Config{},
+		PresenceService: presenceservice.Config{
+			ExpirationTime: timestamp.Now(),
+			Prefix:         PresencePrefix,
+		},
 	}
 	//redis
 	//adp := redis.New(cfg)
@@ -53,11 +62,6 @@ func main() {
 
 	//
 	done := make(chan bool)
-
-	sch := scheduler.New()
-	go func() {
-		sch.Start(done)
-	}()
 
 	go func() {
 		server.Serve()
