@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/pkg/errmsg"
 	"github.com/abbasfisal/game-app/pkg/timestamp"
 	"github.com/abbasfisal/game-app/service/presenceservice"

@@ -1,7 +1,7 @@
 package httpserver
 
 import (
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/pkg/richerror"
 	"github.com/labstack/echo/v4"
 	"net/http"

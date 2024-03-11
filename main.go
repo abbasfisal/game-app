@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/abbasfisal/game-app/config"
-	"github.com/abbasfisal/game-app/deliver/httpserver"
+	"github.com/abbasfisal/game-app/delivery/httpserver"
 	"github.com/abbasfisal/game-app/pkg/timestamp"
 	"github.com/abbasfisal/game-app/repository/mysql"
 	"github.com/abbasfisal/game-app/service/authservice"

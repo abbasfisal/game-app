@@ -3,7 +3,7 @@ package scheduler
 import (
 	"context"
 	"fmt"
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/service/matchingservice"
 	"github.com/go-co-op/gocron/v2"
 	"sync"

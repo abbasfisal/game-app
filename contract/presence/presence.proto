@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package presence;
+option go_package = "contract/golang/presence";
+
+message GetPresenceRequest{
+  repeated int64 user_ids = 1; //means repeated => array
+}
+message GetPresenceResponse{
+  repeated GetPresenceItem items = 1;
+}
+message GetPresenceItem{
+  uint64 user_id = 1;
+  uint64 timestamp = 2;
+}
+
+//------------ server
+service PresenceService{
+  rpc GetPresence(GetPresenceRequest) returns (GetPresenceResponse);
+}

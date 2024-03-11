@@ -2,7 +2,8 @@ package matchingservice
 
 import (
 	"context"
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"fmt"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/pkg/richerror"
 	"time"
@@ -54,6 +55,7 @@ func (s Service) MatchWaitedUsers(ctx context.Context, req dto.MatchWaitedReques
 				UserID:   []uint{list[i].UserID, list[i+1].UserID},
 			}
 
+			fmt.Println(matchedList.UserID)
 			// publish a new event
 
 			//remove from waiting list

@@ -5,7 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/entity"
 	"github.com/abbasfisal/game-app/pkg/phonenumber"
 	"github.com/abbasfisal/game-app/pkg/richerror"

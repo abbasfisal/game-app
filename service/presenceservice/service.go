@@ -3,7 +3,7 @@ package presenceservice
 import (
 	"context"
 	"fmt"
-	"github.com/abbasfisal/game-app/deliver/dto"
+	"github.com/abbasfisal/game-app/delivery/dto"
 	"github.com/abbasfisal/game-app/pkg/richerror"
 	"time"
 )
